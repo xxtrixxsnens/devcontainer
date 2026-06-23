@@ -44,3 +44,20 @@ podman exec -it node_dev nvim .
 # Run Python code inside the running Python container
 podman exec -it python_dev python main.py
 ```
+
+## CI/CD & Pre-built Images
+
+This repository includes a GitHub Actions workflow that automatically builds and pushes the development images on pushes to the `main` branch. 
+
+The images are built as multi-architecture images supporting both **AMD64** (x86_64) and **ARM64** (Apple Silicon, etc.) platforms, and are published to the **GitHub Container Registry (GHCR)**:
+
+- **Node Dev Image:** `ghcr.io/<owner>/<repository>/node-dev:latest`
+- **Python Dev Image:** `ghcr.io/<owner>/<repository>/python-dev:latest`
+
+### Tags Available
+
+- `latest`: Always tracks the latest commit on `main`.
+- `alpine3.20`: Specific to the base Alpine version used.
+- `3.20`: Alias for Alpine version.
+- `sha-<short-sha>`: Built for specific commits.
+
