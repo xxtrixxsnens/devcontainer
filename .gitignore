@@ -1,0 +1,18 @@
+# Local development directories and caches
+.pnpm-home/
+.pnpm-store/
+.venv/
+.cache/
+node_modules/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Editor/environment files
+.env
+.env.local
+.DS_Store
+.idea/
+.vscode/

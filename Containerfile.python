@@ -1,0 +1,33 @@
+# Development Containerfile for Python 3.13
+# Built for Podman / Docker with rootless keep-id support
+
+FROM python:3.13-alpine3.20
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    curl \
+    bash
+
+# Pre-create the cloud user and group matching host UID/GID 1000
+ENV PUID=1000
+ENV PGID=1000
+
+RUN addgroup -g ${PGID} cloud && \
+    adduser -u ${PUID} -G cloud -h /home/cloud -s /bin/bash -D cloud && \
+    mkdir -p /home/cloud/data && \
+    chown -R cloud:cloud /home/cloud
+
+# Setup working directory inside the mounted volume
+WORKDIR /workplace
+
+# Configure pip to cache on the host and use virtual environment in the repo
+ENV PIP_CACHE_DIR=/workplace/.cache/pip
+ENV VIRTUAL_ENV=/workplace/.venv
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
+
+# Switch to the non-root developer user
+USER cloud
+
+# Automatically create venv, install requirements, and run the app
+CMD ["sh", "-c", "if [ ! -d \"$VIRTUAL_ENV\" ]; then python -m venv \"$VIRTUAL_ENV\"; fi && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && python -m src.main"]
