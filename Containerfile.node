@@ -3,11 +3,12 @@
 
 FROM node:20-alpine3.20
 
-# Install build dependencies, git, bash, curl, and Neovim 0.12 from edge
+# Install build dependencies, git, bash, curl
 RUN apk add --no-cache \
     build-base \
     curl \
-    bash
+    bash \
+    git
 
 # Pre-create the cloud user and group matching host UID/GID 1000
 ENV PUID=1000
@@ -20,8 +21,8 @@ RUN (deluser node || true) && \
     mkdir -p /home/cloud && \
     chown -R cloud:cloud /home/cloud
 
-# Enable Corepack and prepare pnpm
-RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
+# 1. Enable Corepack as root to create global symlinks in /usr/local/bin
+RUN corepack enable pnpm
 
 # Setup working directory inside the mounted volume
 WORKDIR /workplace
@@ -33,6 +34,10 @@ ENV PATH=$PNPM_HOME:$PATH
 
 # Switch to the non-root developer user
 USER cloud
+
+# 2. Download and cache the pnpm binary AS the non-root user
+# This caches pnpm locally in /home/cloud/.cache/node/corepack
+RUN corepack prepare pnpm@9.4.0 --activate
 
 # Automatically install packages on startup and run the Vite dev server
 CMD ["sh", "-c", "if [ -f package.json ]; then pnpm install; fi && pnpm dev"]
