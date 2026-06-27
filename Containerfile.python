@@ -28,6 +28,9 @@ ENV PATH=$VIRTUAL_ENV/bin:$PATH
 
 # Switch to the non-root developer user
 USER cloud
+ENV HOME=/home/cloud
+ENV PATH="${HOME}/.local/bin:${PATH}"
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Automatically create venv, install requirements, and run the app
 CMD ["sh", "-c", "if [ ! -d \"$VIRTUAL_ENV\" ]; then python -m venv \"$VIRTUAL_ENV\"; fi && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && python -m src.main"]
