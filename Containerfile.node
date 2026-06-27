@@ -21,15 +21,16 @@ RUN (deluser node || true) && \
     mkdir -p /home/cloud && \
     chown -R cloud:cloud /home/cloud
 
+RUN mkdir -p /home/cloud/workplace
+
 # 1. Enable Corepack as root to create global symlinks in /usr/local/bin
 RUN corepack enable pnpm
 
 # Setup working directory inside the mounted volume
-WORKDIR /workplace
+WORKDIR /home/cloud/workplace
 
-# Configure pnpm to cache packages and store dependencies on the host
-ENV PNPM_HOME=/workplace/.pnpm-home
-ENV pnpm_config_store_dir=/workplace/.pnpm-store
+ENV PNPM_HOME=/home/cloud/.pnpm-home
+ENV pnpm_config_store_dir=/home/cloud/.pnpm-store
 ENV PATH=$PNPM_HOME:$PATH
 
 # Switch to the non-root developer user
