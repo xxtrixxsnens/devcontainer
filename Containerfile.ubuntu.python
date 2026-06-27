@@ -1,0 +1,38 @@
+# Development Containerfile for Python 3.13 (Ubuntu-based)
+# Built for Podman / Docker with rootless keep-id support
+
+FROM python:3.13-slim
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PUID=1000
+ENV PGID=1000
+
+RUN groupadd -g ${PGID} cloud && \
+    useradd -u ${PUID} -g cloud -m -d /home/cloud -s /bin/bash cloud && \
+    mkdir -p /home/cloud/data && \
+    chown -R cloud:cloud /home/cloud
+
+# Setup working directory inside the mounted volume
+WORKDIR /workplace
+
+# Configure pip to cache on the host and use virtual environment in the repo
+ENV PIP_CACHE_DIR=/workplace/.cache/pip
+ENV VIRTUAL_ENV=/workplace/.venv
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
+
+# Switch to the non-root developer user
+USER cloud
+ENV HOME=/home/cloud
+ENV PATH="${HOME}/.local/bin:${PATH}"
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Automatically create venv, install requirements, and run the app
+CMD ["sh", "-c", "if [ ! -d \"$VIRTUAL_ENV\" ]; then python -m venv \"$VIRTUAL_ENV\"; fi && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && python -m src.main"]

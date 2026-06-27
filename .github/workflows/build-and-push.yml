@@ -27,6 +27,8 @@ jobs:
             file: Containerfile.node
           - image-name: python-dev
             file: Containerfile.python
+          - image-name: python-dev-ubuntu
+            file: Containerfile.ubuntu.python
 
     steps:
       - name: Checkout repository
