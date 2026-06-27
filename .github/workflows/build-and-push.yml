@@ -25,10 +25,13 @@ jobs:
         include:
           - image-name: node-dev
             file: Containerfile.node
+            tag: "3.20"
           - image-name: python-dev
             file: Containerfile.python
+            tag: "3.20"
           - image-name: python-dev-ubuntu
             file: Containerfile.ubuntu.python
+            tag: "24.04"
 
     steps:
       - name: Checkout repository
@@ -65,8 +68,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ steps.prep.outputs.repo }}/${{ matrix.image-name }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=3.20,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=alpine3.20,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=${{ matrix.tag }},enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix=sha-,format=short
             type=ref,event=branch
             type=ref,event=pr
