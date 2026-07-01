@@ -1,13 +1,7 @@
-FROM alpine:3.20 AS builder
-
-RUN apk add --no-cache build-base linux-headers libaio-dev libnfs-dev curl tar
-WORKDIR /usr/src/fio
-RUN curl -L https://github.com/axboe/fio/archive/refs/tags/fio-3.42.tar.gz | tar -xz --strip-components=1 && \
-    ./configure && \
-    make -j$(nproc) && \
-    make install
-
+# Dockerfile.fio
 FROM alpine:3.20
-RUN apk add --no-cache libaio
-COPY --from=builder /usr/local/bin/fio /usr/local/bin/fio
-ENTRYPOINT ["fio"]
+
+# Install fio directly from apk
+RUN apk add --no-cache fio
+
+CMD ["fio"]

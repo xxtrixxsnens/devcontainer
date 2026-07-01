@@ -3,4 +3,4 @@ FROM alpine:3.20
 # Installing the pinned version from the community repository
 RUN apk add --no-cache sysbench=1.0.20-r2
 
-ENTRYPOINT ["sysbench"]
+CMD ["sysbench"]
