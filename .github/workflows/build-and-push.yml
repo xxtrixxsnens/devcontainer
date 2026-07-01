@@ -32,6 +32,12 @@ jobs:
           - image-name: python-dev-ubuntu
             file: Containerfile.ubuntu.python
             tag: "24.04"
+          - image-name: fio
+            file: Containerfile.fio
+            tag: "3.42"
+          - image-name: sysbench
+            file: Containerfile.fio
+            tag: "1.0.20"
 
     steps:
       - name: Checkout repository
