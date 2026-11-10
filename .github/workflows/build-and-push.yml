@@ -13,8 +13,85 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  changes:
+    name: Detect changed images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Detect changed files
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            node-dev:
+              - 'Containerfile.node'
+              - 'scripts/**'
+              - '.github/workflows/**'
+            python-dev:
+              - 'Containerfile.python'
+              - 'scripts/**'
+              - '.github/workflows/**'
+            python-dev-ubuntu:
+              - 'Containerfile.ubuntu.python'
+              - 'scripts/**'
+              - '.github/workflows/**'
+            fio:
+              - 'Containerfile.fio'
+              - 'scripts/**'
+              - '.github/workflows/**'
+            sysbench:
+              - 'Containerfile.sysbench'
+              - 'scripts/**'
+              - '.github/workflows/**'
+
+      - name: Generate build matrix
+        id: matrix
+        env:
+          NODE: ${{ steps.filter.outputs.node-dev }}
+          PYTHON: ${{ steps.filter.outputs.python-dev }}
+          UBUNTU_PYTHON: ${{ steps.filter.outputs.python-dev-ubuntu }}
+          FIO: ${{ steps.filter.outputs.fio }}
+          SYSBENCH: ${{ steps.filter.outputs.sysbench }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          images = [
+              ("node-dev", "Containerfile.node", "3.20", "NODE"),
+              ("python-dev", "Containerfile.python", "3.20", "PYTHON"),
+              ("python-dev-ubuntu", "Containerfile.ubuntu.python", "24.04", "UBUNTU_PYTHON"),
+              ("fio", "Containerfile.fio", "3.36", "FIO"),
+              ("sysbench", "Containerfile.sysbench", "1.0.20", "SYSBENCH"),
+          ]
+
+          matrix = [
+              {
+                  "image-name": name,
+                  "file": file,
+                  "tag": tag,
+              }
+              for name, file, tag, env_name in images
+              if os.environ["EVENT_NAME"] == "workflow_dispatch"
+              or os.environ[env_name] == "true"
+          ]
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"matrix={json.dumps(matrix)}\n")
+          PY
+
   build-and-push:
     name: Build and Push
+    needs: changes
+    if: needs.changes.outputs.matrix != '[]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,42 +99,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - image-name: node-dev
-            file: Containerfile.node
-            tag: "3.20"
-          - image-name: python-dev
-            file: Containerfile.python
-            tag: "3.20"
-          - image-name: python-dev-ubuntu
-            file: Containerfile.ubuntu.python
-            tag: "24.04"
-          - image-name: fio
-            file: Containerfile.fio
-            tag: "3.36"
-          - image-name: sysbench
-            file: Containerfile.sysbench
-            tag: "1.0.20"
+        include: ${{ fromJSON(needs.changes.outputs.matrix) }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      # Lowercase the repository name to ensure it is valid for container registries (e.g. ghcr.io)
       - name: Lowercase repository name
         id: prep
         run: |
-          echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+          echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
-      # Set up QEMU for multi-platform builds (AMD64 & ARM64)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
-      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      # Log in to GitHub Container Registry (only on push to main or manual triggers)
       - name: Log in to GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -66,7 +124,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -79,8 +136,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
 
-      # Build and push Docker image with Buildx
-      # Push only on non-pull_request events
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
