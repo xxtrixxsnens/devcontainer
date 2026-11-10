@@ -42,6 +42,14 @@ jobs:
               - 'Containerfile.ubuntu.python'
               - 'scripts/**'
               - '.github/workflows/**'
+            rust-dev:
+              - 'Containerfile.rust'
+              - 'scripts/**'
+              - '.github/workflows/**'
+            uplift:
+              - 'Containerfile.uplift'
+              - 'scripts/**'
+              - '.github/workflows/**'
             fio:
               - 'Containerfile.fio'
               - 'scripts/**'
@@ -69,6 +77,8 @@ jobs:
               ("node-dev", "Containerfile.node", "3.20", "NODE"),
               ("python-dev", "Containerfile.python", "3.20", "PYTHON"),
               ("python-dev-ubuntu", "Containerfile.ubuntu.python", "24.04", "UBUNTU_PYTHON"),
+              ("rust-dev", "Containerfile.rust", "1.91", "RUST"),
+              ("uplift", "Containerfile.uplift", "latest", "UPLIFT"),
               ("fio", "Containerfile.fio", "3.36", "FIO"),
               ("sysbench", "Containerfile.sysbench", "1.0.20", "SYSBENCH"),
           ]
