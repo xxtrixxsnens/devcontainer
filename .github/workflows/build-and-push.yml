@@ -35,37 +35,29 @@ jobs:
             node-dev:
               - 'Containerfile.node'
               - 'scripts/**'
-              - '.github/workflows/**'
             python-dev:
               - 'Containerfile.python'
               - 'scripts/**'
-              - '.github/workflows/**'
             python-dev-ubuntu:
               - 'Containerfile.ubuntu.python'
               - 'scripts/**'
-              - '.github/workflows/**'
             rust-dev:
               - 'Containerfile.rust'
               - 'scripts/**'
-              - '.github/workflows/**'
             uplift:
               - 'Containerfile.uplift'
               - 'scripts/**'
-              - '.github/workflows/**'
             uplift-rust:
               - 'Containerfile.uplift-rust'
               - 'Containerfile.rust'
               - 'Containerfile.uplift'
               - 'scripts/**'
-              - '.github/workflows/**'
             fio:
               - 'Containerfile.fio'
               - 'scripts/**'
-              - '.github/workflows/**'
             sysbench:
               - 'Containerfile.sysbench'
               - 'scripts/**'
-              - '.github/workflows/**'
 
       - name: Generate build matrix
         id: matrix
