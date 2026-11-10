@@ -1,19 +1,22 @@
 ARG RUST_BASE_IMAGE
+ARG UPLIFT_BASE_IMAGE
+
+FROM ${UPLIFT_BASE_IMAGE} AS uplift
+
 FROM ${RUST_BASE_IMAGE}
 
 USER root
+
+COPY --from=uplift /usr/bin/uplift /usr/bin/uplift
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates \
        curl \
        git \
-    && echo 'deb [trusted=yes] https://fury.upliftci.dev/apt/ /' \
-       > /etc/apt/sources.list.d/uplift.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends uplift \
     && rm -rf /var/lib/apt/lists/*
 
 USER runner
+
 WORKDIR /workspace
 CMD ["/bin/bash"]
