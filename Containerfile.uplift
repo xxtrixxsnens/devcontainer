@@ -1,0 +1,26 @@
+FROM debian:bookworm-slim
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN apt-get update && apt-get install -y --no-install-recommends 
+    ca-certificates 
+    curl 
+    git 
+    && echo 'deb [trusted=yes] https://fury.upliftci.dev/apt/ /' 
+       > /etc/apt/sources.list.d/uplift.list 
+    && apt-get update 
+    && apt-get install -y --no-install-recommends uplift 
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --gid ${GROUP_ID} runner 
+    && useradd --uid ${USER_ID} 
+       --gid ${GROUP_ID} 
+       --create-home 
+       --shell /bin/bash runner
+
+USER runner
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

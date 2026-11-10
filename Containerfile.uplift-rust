@@ -1,0 +1,19 @@
+ARG RUST_BASE_IMAGE
+FROM ${RUST_BASE_IMAGE}
+
+USER root
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       curl \
+       git \
+    && echo 'deb [trusted=yes] https://fury.upliftci.dev/apt/ /' \
+       > /etc/apt/sources.list.d/uplift.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends uplift \
+    && rm -rf /var/lib/apt/lists/*
+
+USER runner
+WORKDIR /workspace
+CMD ["/bin/bash"]
