@@ -54,9 +54,10 @@ jobs:
               - '.github/workflows/**'
             uplift-rust:
               - 'Containerfile.uplift-rust'
+              - 'Containerfile.rust'
+              - 'Containerfile.uplift'
               - 'scripts/**'
               - '.github/workflows/**'
-              - 'Containerfile.rust'
             fio:
               - 'Containerfile.fio'
               - 'scripts/**'
@@ -103,9 +104,7 @@ jobs:
                   "tag": tag,
               }
               for name, file, tag, env_name in images
-              if manual
-              or os.environ[env_name] == "true"
-              or (name == "rust-dev" and uplift_rust)
+              if manual or os.environ[env_name] == "true"
           ]
 
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
