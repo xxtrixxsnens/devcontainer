@@ -3,20 +3,20 @@ FROM rust:1.91-bookworm
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-RUN apt-get update && apt-get install -y --no-install-recommends 
-    build-essential 
-    clang 
-    cmake 
-    curl 
-    git 
-    pkg-config 
-    libssl-dev 
-    libcurl4-openssl-dev 
-    ca-certificates 
-    tar 
-    gzip 
-    xz-utils 
-    jq 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    clang \
+    cmake \
+    curl \
+    git \
+    pkg-config \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    ca-certificates \
+    tar \
+    gzip \
+    xz-utils \
+    jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust CI tools
@@ -25,18 +25,18 @@ RUN rustup component add clippy rustfmt
 RUN cargo install cargo-tarpaulin --locked
 
 # Create non-root runner user
-RUN groupadd --gid ${GROUP_ID} runner 
-    && useradd --uid ${USER_ID} 
-       --gid ${GROUP_ID} 
-       --create-home 
-       --shell /bin/bash 
+RUN groupadd --gid ${GROUP_ID} runner \
+    && useradd --uid ${USER_ID} \
+       --gid ${GROUP_ID} \
+       --create-home \
+       --shell /bin/bash \
        runner
 
 ENV CARGO_HOME=/home/runner/.cargo
 ENV RUSTUP_HOME=/usr/local/rustup
 ENV PATH=/home/runner/.cargo/bin:/usr/local/cargo/bin:$PATH
 
-RUN mkdir -p /home/runner/.cargo 
+RUN mkdir -p /home/runner/.cargo \
     && chown -R runner:runner /home/runner
 
 USER runner
